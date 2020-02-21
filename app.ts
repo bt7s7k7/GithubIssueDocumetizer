@@ -28,11 +28,12 @@ const prompt = createInterface(process.stdin, process.stdout);
         if (has == need) {
             console.log("\nDone\n")
             for (let project of Object.keys(sortedIssues).sort()) {
-                console.log(project + ":")
+                console.log("# " + project)
                 for (let issue of Object.keys(sortedIssues[project])) {
                     let issueData = sortedIssues[project][issue]
-                    console.log(`  ${issueData.state == "closed" ? "✔" : "X"}  ${issue} [${issueData.labels.map(v => v.name).join(",")}]`)
+                    console.log(`  - ${issueData.state == "closed" ? "✓ " : ""}${issue} [${issueData.labels.map(v => v.name).join(", ")}] #${issueData.number}`)
                 }
+                console.log("")
             }
         }
     }

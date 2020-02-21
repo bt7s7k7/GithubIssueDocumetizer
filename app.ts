@@ -15,21 +15,23 @@ const prompt = createInterface(process.stdin, process.stdout);
 
     var issues = (await octokit.issues.listForRepo({
         owner: owner,
-        repo: repo
+        repo: repo,
+        state: "all"
     }))
     
-    var need = issues.data.length
+    const issuesToProcess = issues.data.filter(v=>!("pull_request" in v))
+    var need = issuesToProcess.length
     var has = 0
 
     var updateCounter = () => {
         process.stdout.write(`\rLoaded ${has}/${need}`)
         if (has == need) {
             console.log("\nDone\n")
-            for (let project of Object.keys(sortedIssues)) {
+            for (let project of Object.keys(sortedIssues).sort()) {
                 console.log(project + ":")
                 for (let issue of Object.keys(sortedIssues[project])) {
                     let issueData = sortedIssues[project][issue]
-                    console.log(`  ${issue} [${issueData.labels.map(v => v.name).join(",")}]`)
+                    console.log(`  ${issueData.state == "closed" ? "✔" : "X"}  ${issue} [${issueData.labels.map(v => v.name).join(",")}]`)
                 }
             }
         }
@@ -38,7 +40,7 @@ const prompt = createInterface(process.stdin, process.stdout);
     var sortedIssues = {} as { [project: string]: { [name: string]: typeof issues.data[0] } }
 
     updateCounter()
-    issues.data.forEach(v => {
+    issuesToProcess.forEach(v => {
         get(v.html_url, (res) => {
             if (res.statusCode !== 200) {
                 res.resume();
@@ -60,6 +62,11 @@ const prompt = createInterface(process.stdin, process.stdout);
                     updateCounter()
                 })
             }
+
+            res.on("error", (error)=>{
+                console.error(error.stack)
+                process.exit()
+            })
         })
     })
 })()

@@ -3,7 +3,7 @@
         "incremental": true,
         "target": "es6",
         "sourceMap": true,
-        "lib": [ "es6", "dom", "dom.iterable" ],
+        "lib": [ "es6" ],
         "module": "commonjs",
         "outDir": "build"
     }
